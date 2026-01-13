@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta cherset="UTF-8">
+		<title>FlaskApp<</title>
+
+		<style>
+        .toggle-button {
+            display: block;
+            margin-bottom: 10px;   /* ボタン間の間隔 */
+        }
+        </style>
+	</head>
+	<body>
+		<form method="post">
+			<p style="white-space: pre-line;">
+            {{ message }}
+            </p>
+			<button name="action" value="show">{{button_message["show"]}}</button>
+			
+        <!-- 手札 -->
+        <div class="toggle-container">
+            {% for item in hand_items %}
+                <label class="toggle-button">
+                    <input
+                        type="checkbox"
+                        name="choice"
+                        value="{{ item.key }}"
+                        {% if not item.visible %}disabled{% endif %}
+                    >
+                    {{ item.key }} : {{ item.text }}
+                </label>
+            {% endfor %}
+        </div>
+		<button type="submit" name="action" value="exchange">{{button_message["exchange"]}}</button>
+		<button type="submit" name="action" value="change_player">{{button_message["player_change"]}}</button>
+		</form>
+	</body>
+</html>
