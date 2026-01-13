@@ -5,6 +5,7 @@ import time
 
 class Game() :
     def __init__(self, num_of_players):
+        self._num_of_players = num_of_players # 人数
         self._stock: list = self.create_stock() #山札
         self._cards: list = self.create_cards() #Trump型を数字順に格納したリスト
         self._deals: list = self.create_deals(num_of_players)
@@ -165,6 +166,13 @@ class Game() :
         # 最も総合スコアの高いプレイヤーを求める処理
         top_score_lst = [i for i, x in enumerate(self.scores) if x == max(self.scores)]
         return top_score_lst
+    
+    def update_score(self) :
+        # 全員のポイント確定後に呼び出すことでスコアを更新する処理
+        winners = self.get_winner()
+        
+        for winner in winners :
+            self.add_score(winner, self._points[winner])
                 
     def ask_card_Change(self, player_num: int) -> list:
         # 交換する手札の確認
@@ -200,13 +208,13 @@ class Game() :
         for i in range(len(self.scores)) :
             print(f'Player{i+1}: {self.scores[i]}')
     
-    def new_game(self, num_of_players) :
+    def new_game(self) :
         # 各プロパティを初期化し、ターン数を+1
         self._stock = self.create_stock() #山札
         self._cards = self.create_cards() #Trump型を数字順に格納したリスト
-        self._deals = self.create_deals(num_of_players)
-        self._roles = [""] * num_of_players
-        self._points  = [0] * num_of_players
+        self._deals = self.create_deals(self._num_of_players)
+        self._roles = [""] * self._num_of_players
+        self._points  = [0] * self._num_of_players
         self._turn += 1
         
     def output_global_message(self) :

@@ -20,7 +20,7 @@ def game() :
     
 
     while isContinue :
-        GameObject.new_game(player_num)
+        GameObject.new_game()
             
         #手札の配布
 
@@ -72,8 +72,7 @@ def game() :
             winners_for_showing = [i+1 for i in winners]
             print(f"勝者は Player{winners_for_showing}")
         
-        for winner in winners :
-            GameObject.add_score(winner, GameObject._points[winner])
+        GameObject.update_score()
 
         GameObject.show_scores()
             
