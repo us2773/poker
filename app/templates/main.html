@@ -16,7 +16,7 @@
 			<p style="white-space: pre-line;">
             {{ message }}
             </p>
-			<button name="action" value="show">表示</button>
+			<button name="action" value="show">{{button_message["show"]}}</button>
 			
         <!-- 手札 -->
         <div class="toggle-container">
@@ -32,7 +32,8 @@
                 </label>
             {% endfor %}
         </div>
-		<button type="submit" name="action" value="exchange">交換</button>
+		<button type="submit" name="action" value="exchange">{{button_message["exchange"]}}</button>
+		<button type="submit" name="action" value="change_player">{{button_message["player_change"]}}</button>
 		</form>
 	</body>
 </html>

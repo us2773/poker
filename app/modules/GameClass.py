@@ -1,21 +1,28 @@
 import os
 import random
-from . import Trump
-from enum import Enum, auto
+from . import Trump, GameState
+
 
 class Game() :
     def __init__(self, num_of_players):
+        if num_of_players == 1 :
+            num_of_players = 2
+            self.isCP_list: list = [False, True]
+        else :
+            self.isCP_list: list = [False] * num_of_players
         self._num_of_players = num_of_players # 人数
+        self.isCP_list: list = [False] * num_of_players
         self._stock: list = self.create_stock() #山札
         self._cards: list = self.create_cards() #Trump型を数字順に格納したリスト
         self._deals: list = self.create_deals(num_of_players)
         self.scores: list = [0] * num_of_players
-        self.isCP_list: list = [False] * num_of_players
+        
         self._roles: list = [""] * num_of_players
         self._points : list = [0] * num_of_players
-        self._turn: int = 0
-        self._state: gameState = gameState.INIT
-        
+        self._turn: int = 1
+        self._now_playing = 0
+        self._state: GameState.gameState = GameState.gameState.DEAL
+    
     def create_stock(self) :
         # 山札の作成
         # self._stockの初期化に使用
@@ -67,17 +74,17 @@ class Game() :
             deals.append(deal)
         return deals
     
-    def change_deals(self, player_num: int, isChange_list: list) :
+    def change_deals(self, isChange_list: list) :
         # 手札の交換
-        deals = self._deals[player_num]
+        deals = self._deals[self._now_playing]
         for j in range(5) :
             if isChange_list[j] :
                 deals[j] = self.draw_cards(1)[0]
                 self.remove_from_stock(1)
     
-    def add_score(self, player_num: list, points: list) :
+    def add_score(self, num_of_player: int, points: list) :
         # 任意のユーザのスコアの更新
-        self.scores[player_num] += points
+        self.scores[num_of_player] += points
     
     def get_role(self, deals: list) -> str:
         # 手札から役を判定する処理
@@ -150,11 +157,11 @@ class Game() :
             else:
                 return 'ノーハンド'
             
-    def get_point(self, roles: list) -> list :
+    def get_point(self) -> list :
         # 全員の役から全員の点数を求める処理
         point = []
         all_roles = {'ロイヤルストレートフラッシュ':324870, 'ストレートフラッシュ':36097, 'フォーカード':2083, 'フルハウス':347, 'フラッシュ':255, 'ストレート':128, 'スリーカード':24, 'ツーペア':11, 'ワンペア':2, 'ノーハンド':0, }
-        for role in roles:
+        for role in self._roles:
             point.append(all_roles[role])
         return point
 
@@ -202,11 +209,12 @@ class Game() :
         for i in range(5) :
             print(f"{i+1}:{self._card[deals[i]]} ")
     
-    def get_deals(self, player_num) -> list :
-        deals = self._deals[player_num]
+    def get_deals(self) -> list :
+        deals = self._deals[self._now_playing]
         deal_list = []
         for i in range(5) :
             deal_list.append(self._card[deals[i]])
+        print(deals)
         return deal_list
             
     def show_scores(self) :
@@ -222,21 +230,48 @@ class Game() :
             text += f'Player{i+1}: {self.scores[i]}\n'
     
     def new_game(self) :
-        # 各プロパティを初期化し、ターン数を+1
-        self._stock = self.create_stock() #山札
-        self._cards = self.create_cards() #Trump型を数字順に格納したリスト
-        self._deals = self.create_deals(self._num_of_players)
-        self._roles = [""] * self._num_of_players
-        self._points  = [0] * self._num_of_players
-        self._turn += 1
+        if self._state == GameState.gameState.END :
+            # 各プロパティを初期化し、ターン数を+1
+            self._stock = self.create_stock() #山札
+            self._cards = self.create_cards() #Trump型を数字順に格納したリスト
+            self._deals = self.create_deals(self._num_of_players)
+            self._roles = [""] * self._num_of_players
+            self._points  = [0] * self._num_of_players
+            self._now_playing = 0
+            self._turn += 1
+            
+            self.start_turn()
         
     def get_global_message(self) -> str:
-        # ログの削除と全体メッセージの表示
         text = ""
-        text += f"第{self._turn}ラウンド\n"
-        for i in range(len(self._deals)) :
-            text += f"{i+1}P: {self.scores[i]}point\n"
+        if self._state == GameState.gameState.END :
+            print("カードオープン")
             
+            for i in range(self._num_of_players) :
+                text += f"player{i+1}: "
+                text += f"{self._roles[i]}\n"
+                deals = self._deals[i]
+                for j in range(5) :
+                    text += f"{self._card[deals[j]]},"
+                text += "\n"
+            
+            text += f"----------------------\n"
+            winners = self.get_winner()
+            if len(winners) == self._num_of_players :
+                text += "引き分け\n"
+            else :
+                winners_for_showing = [i+1 for i in winners]
+                text += f"勝者は Player{winners_for_showing}\n"
+            
+            text += f"----------------------\n"
+            for i in range(len(self._deals)) :
+                text += f"{i+1}P: {self.scores[i]}point\n"
+        else :
+            text += f"第{self._turn}ラウンド\n"
+            for i in range(len(self._deals)) :
+                text += f"{i+1}P: {self.scores[i]}point\n"
+            text += f"player{self._now_playing+1}のターン\n"
+                
         return text
         
     def output_global_message(self) :
@@ -256,12 +291,40 @@ class Game() :
             if enter == "" or "y" :
                 isWait = False
         
-class gameState(Enum) :
-    INIT = auto()
-    DEAL = auto()
-    HOLD = auto()
-    DRAW = auto()
-    END = auto()
+    def start_turn(self) :
+        self._state = GameState.gameState.DEAL
+        
+    def show_deals(self) :
+        self._state = GameState.gameState.HOLD
+    
+    def change_cards(self) :
+        self._state = GameState.gameState.DRAW
+        
+    def change_player(self) :
+        if self._now_playing < self._num_of_players-1 :
+            self._now_playing += 1
+            self.start_turn()
+        else :
+            self.end_game()
+    
+    def end_game(self) :
+        for i in range(self._num_of_players) : 
+            self._roles[i] = self.get_role(self._deals[i])
+                
+        self._points = self.get_point()
+        self.update_score()
+        self._state = GameState.gameState.END
+
+    def log(self) :
+        print(f"num of player: {self._num_of_players}")
+        print(f"scores:{self.scores}")
+        print(f"roles: {self._roles}")
+        print(f"points: {self._points}")
+        print(f"turn: {self._turn}")
+        print(f"now playing: {self._now_playing}")
+        print(f"state: {self._state}")
+        print(f"deals: {self._deals}")
+
     
 if __name__ == "__main__" :
-    print(gameState.INIT)
+    print(GameState.gameState().INIT)
