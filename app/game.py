@@ -1,5 +1,5 @@
 import time
-from modules import Game
+from modules import GameClass
 
 def game() :
     player_num = 0
@@ -16,7 +16,7 @@ def game() :
             break
         else :
             continue
-    GameObject  = Game(player_num)
+    GameObject  = GameClass.Game(player_num)
     
 
     while isContinue :
