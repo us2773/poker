@@ -1,7 +1,7 @@
 import os
 import random
-from modules import Trump
-import time
+from . import Trump
+from enum import Enum, auto
 
 class Game() :
     def __init__(self, num_of_players):
@@ -14,6 +14,7 @@ class Game() :
         self._roles: list = [""] * num_of_players
         self._points : list = [0] * num_of_players
         self._turn: int = 0
+        self._state: gameState = gameState.INIT
         
     def create_stock(self) :
         # 山札の作成
@@ -200,6 +201,13 @@ class Game() :
         deals = self._deals[player_num]
         for i in range(5) :
             print(f"{i+1}:{self._card[deals[i]]} ")
+    
+    def get_deals(self, player_num) -> list :
+        deals = self._deals[player_num]
+        deal_list = []
+        for i in range(5) :
+            deal_list.append(self._card[deals[i]])
+        return deal_list
             
     def show_scores(self) :
         # スコアを出力する処理
@@ -207,6 +215,11 @@ class Game() :
         print("Score")    
         for i in range(len(self.scores)) :
             print(f'Player{i+1}: {self.scores[i]}')
+    
+    def get_score_message(self) ->str :
+        text = "Score\n"
+        for i in range(len(self.scores)) :
+            text += f'Player{i+1}: {self.scores[i]}\n'
     
     def new_game(self) :
         # 各プロパティを初期化し、ターン数を+1
@@ -216,6 +229,15 @@ class Game() :
         self._roles = [""] * self._num_of_players
         self._points  = [0] * self._num_of_players
         self._turn += 1
+        
+    def get_global_message(self) -> str:
+        # ログの削除と全体メッセージの表示
+        text = ""
+        text += f"第{self._turn}ラウンド\n"
+        for i in range(len(self._deals)) :
+            text += f"{i+1}P: {self.scores[i]}point\n"
+            
+        return text
         
     def output_global_message(self) :
         # ログの削除と全体メッセージの表示
@@ -234,3 +256,12 @@ class Game() :
             if enter == "" or "y" :
                 isWait = False
         
+class gameState(Enum) :
+    INIT = auto()
+    DEAL = auto()
+    HOLD = auto()
+    DRAW = auto()
+    END = auto()
+    
+if __name__ == "__main__" :
+    print(gameState.INIT)

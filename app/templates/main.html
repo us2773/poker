@@ -12,29 +12,27 @@
         </style>
 	</head>
 	<body>
-		<div>
-			<p>text here.</p>
-			<button id="show">表示</button>
+		<form method="post">
+			<p style="white-space: pre-line;">
+            {{ message }}
+            </p>
+			<button name="action" value="show">表示</button>
 			
-		</div>
-		<div class="toggle-container">
-			<label class="toggle-button">
-				<input type="checkbox", id="A">A
-			</label>
-			<label class="toggle-button">
-				<input type="checkbox", id="B">B
-			</label>
-			<label class="toggle-button">
-				<input type="checkbox", id="C">C
-			</label>
-			<label class="toggle-button">
-				<input type="checkbox", id="D">D
-			</label>
-			<label class="toggle-button">
-				<input type="checkbox", id="E">E
-			</label>
-		</div>
-		<button id="submit">交換</button>
-
+        <!-- 手札 -->
+        <div class="toggle-container">
+            {% for item in hand_items %}
+                <label class="toggle-button">
+                    <input
+                        type="checkbox"
+                        name="choice"
+                        value="{{ item.key }}"
+                        {% if not item.visible %}disabled{% endif %}
+                    >
+                    {{ item.key }} : {{ item.text }}
+                </label>
+            {% endfor %}
+        </div>
+		<button type="submit" name="action" value="exchange">交換</button>
+		</form>
 	</body>
 </html>
