@@ -1,5 +1,5 @@
 import time
-import game
+from modules import Game
 
 def game() :
     player_num = 0
